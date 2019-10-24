@@ -1,0 +1,148 @@
+Index: src/main/java/com/play/majiang/jus_demo/controller/QuestionController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/play/majiang/jus_demo/controller/QuestionController.java	(date 1571901443545)
++++ src/main/java/com/play/majiang/jus_demo/controller/QuestionController.java	(date 1571901443545)
+@@ -0,0 +1,32 @@
++package com.play.majiang.jus_demo.controller;
++
++import com.play.majiang.jus_demo.dto.QuestionDTO;
++import com.play.majiang.jus_demo.mapper.QuestionMapper;
++import com.play.majiang.jus_demo.model.Question;
++import com.play.majiang.jus_demo.service.QuestionService;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.stereotype.Controller;
++import org.springframework.ui.Model;
++import org.springframework.web.bind.annotation.GetMapping;
++import org.springframework.web.bind.annotation.PathVariable;
++
++/**
++ * created by wm on 2019/10/24
++ */
++
++@Controller
++public class QuestionController {
++
++
++    @Autowired
++    private QuestionService questionService;
++
++    @GetMapping("/question/{id}")
++    public String question(@PathVariable(name = "id")Integer id,
++                           Model model){
++        QuestionDTO questionDTO= questionService.getById(id);
++        model.addAttribute("question",questionDTO);
++        return "question";
++    }
++
++}
+Index: src/main/java/com/play/majiang/jus_demo/interceptor/WebConfig.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/play/majiang/jus_demo/interceptor/WebConfig.java	(revision 8b22135fd720705b34c04b913de8765e038731a6)
++++ src/main/java/com/play/majiang/jus_demo/interceptor/WebConfig.java	(date 1571899994116)
+@@ -11,7 +11,7 @@
+  */
+ 
+ @Configuration
+-@EnableWebMvc
++//@EnableWebMvc
+ public class WebConfig implements WebMvcConfigurer {
+     @Autowired
+     private  SessionInterceptor sessionInterceptor;
+Index: src/main/java/com/play/majiang/jus_demo/mapper/QuestionMapper.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/play/majiang/jus_demo/mapper/QuestionMapper.java	(revision 8b22135fd720705b34c04b913de8765e038731a6)
++++ src/main/java/com/play/majiang/jus_demo/mapper/QuestionMapper.java	(date 1571901385225)
+@@ -28,4 +28,7 @@
+ 
+      @Select("select count(1) from question where creator=#{userId}")
+      Integer countByUserId(@Param("userId") Integer userId);
++
++     @Select("select * from question where id=#{id}")
++     Question getById(@Param("id") Integer id);
+ }
+Index: src/main/java/com/play/majiang/jus_demo/service/QuestionService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/play/majiang/jus_demo/service/QuestionService.java	(revision 8b22135fd720705b34c04b913de8765e038731a6)
++++ src/main/java/com/play/majiang/jus_demo/service/QuestionService.java	(date 1571901186958)
+@@ -97,4 +97,11 @@
+         paginationDTO.setQuestions(questionDTOList);
+         return paginationDTO;
+     }
++
++    public QuestionDTO getById(Integer id) {
++        Question question=questionMapper.getById(id);
++        QuestionDTO questionDTO=new QuestionDTO();
++        BeanUtils.copyProperties(question,questionDTO);
++        return null;
++    }
+ }
+Index: src/main/resources/templates/index.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/resources/templates/index.html	(revision 8b22135fd720705b34c04b913de8765e038731a6)
++++ src/main/resources/templates/index.html	(date 1571902389485)
+@@ -25,7 +25,9 @@
+                         </a>
+                     </div>
+                     <div class="media-body">
+-                        <h4 class="media-heading" th:text="${question.title}"></h4>
++                        <h4 class="media-heading" >
++                            <a th:href="@{'/question/'+${question.id}}" th:text="${question.title}"></a>
++                        </h4>
+                         <span th:text="${question.description}"></span><br>
+                         <span class="text-desc"><span th:text="${question.commentCount}"></span>个回复·
+                             <span th:text="${question.viewCount}"></span>次浏览·
+Index: src/main/resources/templates/question.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/resources/templates/question.html	(date 1571903886346)
++++ src/main/resources/templates/question.html	(date 1571903886346)
+@@ -0,0 +1,31 @@
++<!DOCTYPE HTML>
++<html xmlns:th="http://www.thymeleaf.org">
++<head>
++    <title th:text="${question.title}"></title>
++    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
++    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
++    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
++    <link rel="stylesheet" href="/css/community.css">
++    <script src="/js/jquery-3.4.1.min.js"></script>
++    <script src="/js/bootstrap.min.js" type="application/javascript"></script>
++</head>
++<body>
++<div th:insert="~{navigation :: nav}"></div>
++<div class="container-fluid  main profile" >
++    <div class="row" style="background:white">
++        <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12" >
++            <h4><span th:text="${question.title}"></span></h4>
++            <hr>
++        </div>
++        <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
++            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
++                <h4>发起人</h4>
++            </div>
++            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
++                <h4>热门话题</h4>
++            </div>
++        </div>
++    </div>
++</div>
++</body>
++</html>
+\ No newline at end of file

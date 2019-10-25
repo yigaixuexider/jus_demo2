@@ -1,10 +1,7 @@
 package com.play.majiang.jus_demo.mapper;
 
 import com.play.majiang.jus_demo.model.User;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 /**
  * created by wm on 2019/10/10
@@ -15,9 +12,15 @@ public interface UserMapper {
     @Insert("insert into user(name,account_id,token,gmt_create,gmt_modified,avatar_url) values(#{name},#{accountId},#{token},#{gmtCreate},#{gmtModified},#{avatarUrl})")
     void insert(User user);
 
-    @Select("Select * from user where token=#{token}")
+    @Select("select * from user where token=#{token}")
     User findByToken(@Param("token") String token);
 
-    @Select("Select * from user where id=#{id}")
+    @Select("select * from user where id=#{id}")
     User findById(@Param("id") Integer id);
+
+    @Select("select * from user where account_id=#{accountId}")
+    User findByAccountId(@Param("accountId") String accountId);
+
+    @Update("update user set name=#{name},token=#{token},gmt_modified=#{gmtModified},avatar_url=#{avatarUrl} where id=#{id}")
+    void update(User user);
 }
